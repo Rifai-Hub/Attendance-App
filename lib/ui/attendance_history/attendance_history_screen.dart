@@ -14,7 +14,10 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
   final CollectionReference dataCollection = FirebaseFirestore.instance
       .collection('attendance');
 
-  // function Edit Data
+  final Color primaryColor = const Color(0xFF2B3990);
+  final Color backgroundColor = const Color(0xFFF9FAFB);
+  final Color textDark = const Color(0xFF1F2937);
+
   void _editData(
     String docId,
     String currentName,
@@ -39,29 +42,30 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text("Edit Data"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(labelText: "Name"),
-                ),
-                TextField(
-                  controller: addressController,
-                  decoration: const InputDecoration(labelText: "Address"),
-                ),
-                TextField(
-                  controller: descriptionController,
-                  decoration: const InputDecoration(labelText: "Description"),
-                ),
-                TextField(
-                  controller: datetimeController,
-                  decoration: const InputDecoration(labelText: "Datetime"),
-                ),
-              ],
+            backgroundColor: Colors.white,
+            title: const Text(
+              "Ubah Data",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildEditField(nameController, "Nama"),
+                  _buildEditField(addressController, "Alamat"),
+                  _buildEditField(descriptionController, "Keterangan"),
+                  _buildEditField(datetimeController, "Waktu"),
+                ],
+              ),
             ),
             actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  "Batal",
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
               TextButton(
                 onPressed: () async {
                   await dataCollection.doc(docId).update({
@@ -70,19 +74,16 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                     'description': descriptionController.text,
                     'datetime': datetimeController.text,
                   });
+                  if (!mounted) return;
                   Navigator.pop(context);
-                  setState(() {}); // Update screen after edit
+                  setState(() {});
                 },
-                child: const Text(
-                  "Save",
-                  style: TextStyle(color: Colors.blueAccent),
-                ),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  "Cancel",
-                  style: TextStyle(color: Colors.black),
+                child: Text(
+                  "Simpan",
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -90,26 +91,56 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     );
   }
 
-  // Function Delete Data
+  Widget _buildEditField(TextEditingController controller, String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 12,
+          ),
+        ),
+      ),
+    );
+  }
+
   void _deleteData(String docId) {
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text("Delete Data"),
-            content: const Text("Are you sure want to delete this data?"),
+            backgroundColor: Colors.white,
+            title: const Text(
+              "Hapus Data",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: const Text("Yakin ingin menghapus data ini?"),
             actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  "Batal",
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
               TextButton(
                 onPressed: () async {
                   await dataCollection.doc(docId).delete();
+                  if (!mounted) return;
                   Navigator.pop(context);
-                  setState(() {}); // Perbarui tampilan setelah delete
+                  setState(() {});
                 },
-                child: const Text("Yes", style: TextStyle(color: Colors.red)),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("No", style: TextStyle(color: Colors.black)),
+                child: const Text(
+                  "Ya, Hapus",
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           ),
@@ -119,21 +150,21 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color.fromARGB(255, 26, 0, 143),
+        backgroundColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
           onPressed: () => Navigator.of(context).pop(),
         ),
         centerTitle: true,
-        title: const Text(
-          "Attendance History Menu",
+        title: Text(
+          "Riwayat Kehadiran",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: textDark,
           ),
         ),
       ),
@@ -144,6 +175,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
             var data = snapshot.data!.docs;
             return data.isNotEmpty
                 ? ListView.builder(
+                  padding: const EdgeInsets.all(16),
                   itemCount: data.length,
                   itemBuilder: (context, index) {
                     var docId = data[index].id;
@@ -152,107 +184,162 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                     var description = data[index]['description'];
                     var datetime = data[index]['datetime'];
 
-                    return Card(
-                      margin: const EdgeInsets.all(10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    Color avatarColor =
+                        Colors.primaries[Random().nextInt(
+                          Colors.primaries.length,
+                        )];
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                        border: Border.all(color: Colors.grey.shade100),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        leading: CircleAvatar(
+                          backgroundColor: avatarColor.withOpacity(0.1),
+                          radius: 25,
+                          child: Text(
+                            name[0].toUpperCase(),
+                            style: TextStyle(
+                              color: avatarColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                        title: Text(
+                          name,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: textDark,
+                          ),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Circle Avatar
-                            Container(
-                              height: 50,
-                              width: 50,
-                              decoration: BoxDecoration(
-                                color:
-                                    Colors.primaries[Random().nextInt(
-                                      Colors.primaries.length,
-                                    )],
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  name[0].toUpperCase(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 19),
-
-                            // Read Data
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.center, // Center vertikal
-                                children: [
-                                  Text(
-                                    "Name: $name",
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                  Text(
-                                    "Address: $address",
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                  Text(
-                                    "Description: $description",
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                  Text(
-                                    "Timestamp: $datetime",
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            // Edit & Delete Button
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                            const SizedBox(height: 4),
+                            Row(
                               children: [
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.edit,
-                                    color: Colors.blueAccent,
-                                  ),
-                                  onPressed:
-                                      () => _editData(
-                                        docId,
-                                        name,
-                                        address,
-                                        description,
-                                        datetime,
-                                      ),
+                                Icon(
+                                  Icons.access_time,
+                                  size: 14,
+                                  color: Colors.grey[500],
                                 ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
+                                const SizedBox(width: 4),
+                                Text(
+                                  datetime,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
                                   ),
-                                  onPressed: () => _deleteData(docId),
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 4),
+                            Text(
+                              description,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color:
+                                    description == "Attend"
+                                        ? Colors.green
+                                        : Colors.orange,
+                              ),
+                            ),
                           ],
+                        ),
+                        trailing: PopupMenuButton(
+                          icon: Icon(Icons.more_vert, color: Colors.grey[400]),
+                          itemBuilder:
+                              (context) => [
+                                PopupMenuItem(
+                                  value: 'edit',
+                                  child: const Row(
+                                    children: [
+                                      Icon(
+                                        Icons.edit,
+                                        color: Colors.blue,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 10),
+                                      Text("Ubah"),
+                                    ],
+                                  ),
+                                  onTap:
+                                      () => Future.delayed(
+                                        Duration.zero,
+                                        () => _editData(
+                                          docId,
+                                          name,
+                                          address,
+                                          description,
+                                          datetime,
+                                        ),
+                                      ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'delete',
+                                  child: const Row(
+                                    children: [
+                                      Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 10),
+                                      Text("Hapus"),
+                                    ],
+                                  ),
+                                  onTap:
+                                      () => Future.delayed(
+                                        Duration.zero,
+                                        () => _deleteData(docId),
+                                      ),
+                                ),
+                              ],
                         ),
                       ),
                     );
                   },
                 )
-                : const Center(
-                  child: Text(
-                    "Ups, there is no data!",
-                    style: TextStyle(fontSize: 20),
+                : Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.history_toggle_off,
+                        size: 60,
+                        color: Colors.grey[300],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        "Belum ada riwayat data!",
+                        style: TextStyle(fontSize: 16, color: Colors.grey[500]),
+                      ),
+                    ],
                   ),
                 );
           } else {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+              ),
+            );
           }
         },
       ),
