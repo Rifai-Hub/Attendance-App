@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:attendance_app/ui/home_screen.dart';
+import 'package:intl/date_symbol_data_local.dart'; 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,7 @@ Future<void> main() async {
         projectId: 'attendance-app-a1762', 
       ),
     );
+    await initializeDateFormatting('id_ID', null);
     // Firebase connection success
     print("Firebase Terhubung ke:");
     print("API Key: ${Firebase.app().options.apiKey}");
