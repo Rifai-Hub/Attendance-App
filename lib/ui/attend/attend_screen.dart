@@ -1,11 +1,11 @@
-import 'dart:io'; // Provides access to file and directory operations for working with the filesystem.
-import 'package:camera/camera.dart'; // Allows access to the device camera for capturing photos or videos.
+import 'dart:io'; 
+import 'package:camera/camera.dart'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dotted_border/dotted_border.dart'; // Provides a widget to create a dotted or dashed border around elements.
+import 'package:dotted_border/dotted_border.dart'; 
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart'; // Converts coordinates into addresses.
-import 'package:geolocator/geolocator.dart'; // Handles retrieving the device’s current location and managing GPS permissions.
-import 'package:intl/intl.dart'; // Used for formatting dates, numbers, and localization support.
+import 'package:geocoding/geocoding.dart'; 
+import 'package:geolocator/geolocator.dart'; 
+import 'package:intl/intl.dart'; 
 import 'package:attendance_app/ui/attend/camera_screen.dart';
 import 'package:attendance_app/ui/home_screen.dart';
 
@@ -31,8 +31,12 @@ class _AttendScreenState extends State<AttendScreen> {
   double dLat = 0.0, dLong = 0.0;
   int dateHours = 0, dateMinutes = 0;
   final controllerName = TextEditingController();
-  final CollectionReference dataCollection = FirebaseFirestore.instance
-      .collection('attendance');
+  final CollectionReference dataCollection =
+      FirebaseFirestore.instance.collection('attendance');
+
+  final Color primaryColor = const Color(0xFF2B3990);
+  final Color backgroundColor = const Color(0xFFF9FAFB);
+  final Color textDark = const Color(0xFF1F2937);
 
   @override
   void initState() {
@@ -52,253 +56,250 @@ class _AttendScreenState extends State<AttendScreen> {
     Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color.fromARGB(255, 26, 0, 143),
+        backgroundColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        centerTitle: true,
-        title: const Text(
-          "Attendance Menu",
+        title: Text(
+          "Absensi Kehadiran",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: textDark,
           ),
         ),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
-        child: Card(
-          color: Colors.white,
-          margin: const EdgeInsets.fromLTRB(10, 10, 10, 30),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          elevation: 5,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 50,
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10),
-                  ),
-                  color: Colors.blueAccent,
-                ),
-                child: const Row(
-                  children: [
-                    SizedBox(width: 12),
-                    Icon(
-                      Icons.face_retouching_natural_outlined,
-                      color: Colors.white,
-                    ),
-                    SizedBox(width: 12),
-                    Text(
-                      "Please make a selfie photo!",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "1. Ambil Foto Selfie",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: textDark,
               ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(10, 20, 0, 20),
-                child: Text(
-                  "Capture Photo",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+            ),
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CameraScreen(),
                   ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CameraScreen(),
-                    ),
-                  );
-                },
+                );
+              },
+              child: DottedBorder(
+                borderType: BorderType.RRect,
+                radius: const Radius.circular(20),
+                dashPattern: const [8, 4],
+                color: Colors.grey.shade400,
+                strokeWidth: 2,
                 child: Container(
-                  margin: const EdgeInsets.fromLTRB(10, 0, 10, 20),
                   width: size.width,
-                  height: 150,
-                  child: DottedBorder(
-                    radius: const Radius.circular(10),
-                    borderType: BorderType.RRect,
-                    color: Colors.blueAccent,
-                    strokeWidth: 1,
-                    dashPattern: const [5, 5],
-                    child: SizedBox.expand(
-                      child: FittedBox(
-                        child:
-                            image != null
-                                ? Image.file(
-                                  File(image!.path),
-                                  fit: BoxFit.cover,
-                                )
-                                : const Icon(
-                                  Icons.camera_enhance_outlined,
-                                  color: Colors.blueAccent,
-                                ),
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: image != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: Image.file(
+                            File(image!.path),
+                            fit: BoxFit.cover,
+                            width: size.width,
+                          ),
+                        )
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.camera_enhance_rounded,
+                                color: primaryColor, size: 40),
+                            const SizedBox(height: 10),
+                            Text(
+                              "Tap di sini untuk foto",
+                              style: TextStyle(color: Colors.grey.shade500),
+                            ),
+                          ],
+                        ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            Text(
+              "2. Identitas Diri",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: textDark,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: TextField(
+                controller: controllerName,
+                style: TextStyle(color: textDark),
+                decoration: InputDecoration(
+                  hintText: "Masukkan Nama Lengkap",
+                  hintStyle: TextStyle(color: Colors.grey.shade400),
+                  prefixIcon: Icon(Icons.person_outline, color: primaryColor),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 16),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            Text(
+              "3. Lokasi Anda",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: textDark,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade200),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: isLoading
+                  ? Center(
+                      child: SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          color: primaryColor,
+                          strokeWidth: 3,
+                        ),
                       ),
+                    )
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.location_on_outlined,
+                            color: Colors.redAccent, size: 24),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Posisi Saat Ini:",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade500,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                strAlamat.isNotEmpty
+                                    ? strAlamat
+                                    : "Mencari lokasi...",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: textDark,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
+            ),
+
+            const SizedBox(height: 40),
+
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
+                  elevation: 2,
+                  shadowColor: primaryColor.withOpacity(0.4),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: TextField(
-                  textInputAction: TextInputAction.done,
-                  keyboardType: TextInputType.text,
-                  controller: controllerName,
-                  decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                    labelText: "Your Name",
-                    hintText: "Please enter your name",
-                    hintStyle: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                    labelStyle: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.blueAccent),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.blueAccent),
-                    ),
-                  ),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                child: Text(
-                  "Your Location",
+                onPressed: () {
+                  if (image == null || controllerName.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Row(
+                          children: [
+                            Icon(Icons.error_outline, color: Colors.white),
+                            SizedBox(width: 10),
+                            Text("Harap lengkapi foto dan nama!"),
+                          ],
+                        ),
+                        backgroundColor: Colors.redAccent,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  } else {
+                    submitAbsen(
+                      strAlamat,
+                      controllerName.text.toString(),
+                      strStatus,
+                    );
+                  }
+                },
+                child: const Text(
+                  "Check In Sekarang",
                   style: TextStyle(
+                    color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),
-              isLoading
-                  ? const Center(
-                    child: CircularProgressIndicator(color: Colors.blueAccent),
-                  )
-                  : Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: SizedBox(
-                      height: 5 * 24,
-                      child: TextField(
-                        enabled: false,
-                        maxLines: 5,
-                        decoration: InputDecoration(
-                          alignLabelWithHint: true,
-                          disabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(
-                              color: Colors.blueAccent,
-                            ),
-                          ),
-                          hintText: strAlamat,
-                          hintStyle: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                          fillColor: Colors.transparent,
-                          filled: true,
-                        ),
-                      ),
-                    ),
-                  ),
-              Container(
-                alignment: Alignment.center,
-                margin: const EdgeInsets.all(30),
-                child: Material(
-                  elevation: 3,
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    width: size.width,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.white,
-                    ),
-                    child: Material(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.blueAccent,
-                      child: InkWell(
-                        splashColor: Colors.blue,
-                        borderRadius: BorderRadius.circular(20),
-                        onTap: () {
-                          if (image == null || controllerName.text.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.info_outline,
-                                      color: Colors.white,
-                                    ),
-                                    SizedBox(width: 10),
-                                    Text(
-                                      "Please Fill all the forms!",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  ],
-                                ),
-                                backgroundColor: Colors.blueGrey,
-                                shape: StadiumBorder(),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          } else {
-                            submitAbsen(
-                              strAlamat,
-                              controllerName.text.toString(),
-                              strStatus,
-                            );
-                          }
-                        },
-                        child: const Center(
-                          child: Text(
-                            "Report Now",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  //get realtime location
   Future<void> getGeoLocationPosition() async {
-    // ignore: deprecated_member_use
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.low,
     );
@@ -308,7 +309,6 @@ class _AttendScreenState extends State<AttendScreen> {
     });
   }
 
-  //get address by lat long
   Future<void> getAddressFromLongLat(Position position) async {
     List<Placemark> placemarks = await placemarkFromCoordinates(
       position.latitude,
@@ -318,13 +318,12 @@ class _AttendScreenState extends State<AttendScreen> {
     Placemark place = placemarks[0];
     setState(() {
       dLat = double.parse('${position.latitude}');
-      dLat = double.parse('${position.longitude}');
+      dLong = double.parse('${position.longitude}');
       strAlamat =
           "${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}";
     });
   }
 
-  //permission location
   Future<bool> handleLocationPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -396,13 +395,12 @@ class _AttendScreenState extends State<AttendScreen> {
     return true;
   }
 
-  //show progress dialog
   showLoaderDialog(BuildContext context) {
     AlertDialog alert = AlertDialog(
       content: Row(
         children: [
           const CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey),
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2B3990)),
           ),
           Container(
             margin: const EdgeInsets.only(left: 20),
@@ -420,7 +418,6 @@ class _AttendScreenState extends State<AttendScreen> {
     );
   }
 
-  //check format date time
   void setDateTime() async {
     var dateNow = DateTime.now();
     var dateFormat = DateFormat('dd MMMM yyyy');
@@ -438,7 +435,6 @@ class _AttendScreenState extends State<AttendScreen> {
     });
   }
 
-  //check status absent
   void setStatusAbsen() {
     if (dateHours < 8 || (dateHours == 8 && dateMinutes <= 30)) {
       strStatus = "Attend";
@@ -450,7 +446,6 @@ class _AttendScreenState extends State<AttendScreen> {
     }
   }
 
-  //submit data absent to firebase
   Future<void> submitAbsen(String alamat, String nama, String status) async {
     showLoaderDialog(context);
     dataCollection
@@ -476,8 +471,7 @@ class _AttendScreenState extends State<AttendScreen> {
                       ),
                     ],
                   ),
-                  backgroundColor: Colors.orangeAccent,
-                  shape: StadiumBorder(),
+                  backgroundColor: Colors.green,
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -501,7 +495,6 @@ class _AttendScreenState extends State<AttendScreen> {
                     ],
                   ),
                   backgroundColor: Colors.blueGrey,
-                  shape: const StadiumBorder(),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -524,7 +517,6 @@ class _AttendScreenState extends State<AttendScreen> {
                 ],
               ),
               backgroundColor: Colors.blueGrey,
-              shape: const StadiumBorder(),
               behavior: SnackBarBehavior.floating,
             ),
           );
